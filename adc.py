@@ -14,7 +14,7 @@ def adcRead(slave_addr, i2c_addr):
     return data
 
 while True:
-    print(adcRead('000', int(48,8)))
+    print(adcRead('000', int('48',8)))
     sleep(.1)
 
 
