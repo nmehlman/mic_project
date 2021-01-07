@@ -11,7 +11,7 @@ def adcReadInit(slave_addr : str, i2c_addr: int, adc_ch: int):
     addr_data = '0b' + '1001' + slave_addr + '1'
     addr_data_int = int(addr_data, 2)
     
-    control_data = '0b000001' + bin(adc_ch).replace('0b', '') #Assumes non-differential input
+    control_data = '0b000000' + bin(adc_ch).replace('0b', '') #Assumes non-differential input
     control_data_int = int(control_data, 2)
     
     i2c_addr = int(str(i2c_addr), 16)
