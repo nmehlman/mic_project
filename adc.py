@@ -10,11 +10,11 @@ def adcRead(slave_addr, i2c_addr):
         bus.write_byte_data(i2c_addr, 0, addr_data_int)
         bus.write_byte_data(i2c_addr, 0, control_data_int)
     with SMBus(1) as bus: 
-        pass#data = bus.read_bus_data(i2c_addr, 0)
+        data = bus.read_bus_data(i2c_addr, 0)
     return data
 
 while True:
-    print(adcRead('000', 48))
+    print(adcRead('000', int(48,8)))
     sleep(.1)
 
 
