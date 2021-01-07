@@ -32,5 +32,5 @@ def getSample(i2c_addr: int):
 adcReadInit('000', 48, 0)
 while True:
     print(getSample(48))
-
+    sleep(.1)
 
