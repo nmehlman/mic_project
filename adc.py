@@ -27,7 +27,7 @@ def getSample(i2c_addr: int):
     with SMBus(1) as bus:    
         sample = bus.read_byte(i2c_addr, 0)
 
-    return int(sample, 8)
+    return int(str(sample), 8)
 
 adcReadInit('000', 48, 0)
 while True:
