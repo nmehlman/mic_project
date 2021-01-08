@@ -1,5 +1,6 @@
 from smbus2 import SMBus
 from time import sleep
+from time import perf_counter as timer
 
 def adcReadInit(bus, i2c_addr, slave_addr, adc_ch):
 
@@ -23,6 +24,10 @@ def getSample(bus, i2c_addr):
 bus = SMBus(1)
 adcReadInit(bus, 0X48, '000', 0)
 samples = []
-for i in range(44100):
+
+s = timer()
+for i in range(100):
     sample = getSample(bus, 0X48)
     sleep(1/44100)
+e = timer()
+print(e-s)
