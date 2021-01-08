@@ -10,6 +10,7 @@ def adcReadInit(bus, i2c_addr, slave_addr, adc_ch):
     \nadc_ch -> channel where adc is connected (0-3)'''
 
     addr_byte = '0b1001' + slave_addr + '1'
+    addr_byte = int(addr_byte, 8)
     control_byte = hex(adc_ch)
 
     bus.write_byte(i2c_addr, addr_byte)
