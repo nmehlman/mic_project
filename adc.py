@@ -20,6 +20,7 @@ def adcReadInit(slave_addr : str, i2c_addr: int, adc_ch: int):
     while True:
         bus.write_byte(i2c_addr,addr_data_int) #Adress
         sample = bus.read_byte(i2c_addr)
+        print(sample)
 
     return sample
 
