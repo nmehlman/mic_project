@@ -14,7 +14,7 @@ def adcReadInit(bus, i2c_addr, slave_addr, adc_ch):
     control_byte = hex(adc_ch)
 
     bus.write_byte(i2c_addr, addr_byte)
-    bus.write_byte(i2c_addr, addr_byte)
+    bus.write_byte(i2c_addr, control_byte)
     
 def getSample(bus, i2c_addr):
     return bus.read_byte(i2c_addr)
