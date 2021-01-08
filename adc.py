@@ -25,6 +25,4 @@ adcReadInit(bus, 0X48, '000', 0)
 samples = []
 for i in range(44100):
     sample = getSample(bus, 0X48)
-    samples.append(sample)
-    print(sample)
     sleep(1/44100)
