@@ -9,20 +9,16 @@ def adcReadInit(slave_addr : str, i2c_addr: int, adc_ch: int):
     \nadc_ch -> channel where adc is connected (0-3)'''
 
     address = 0x48
-    cmd = 0x40
-    value = 0
-
+    A0 = 0x40
+    A1 = 0x41
+    A2 = 0x42
+    A3 = 0x43
     bus = SMBus(1)
     while True:
-        bus.write_byte_data(address,cmd,value)
-        value += 1
-        if value == 256:
-            value =0
-        print("AOUT:%3d" %value)
-        sleep(0.01)
+        bus.write_byte(address,A0)
+        value = bus.read_byte(address)
+        print("AOUT:%1.3f  " %(value*3.3/255))
+        sleep(0.1)
+   
 
-adcReadInit('000', 48, 0)
-while True:
-    print(adcReadInit('000', 48, 0))
-    sleep(.1)
-
+adcReadInit(1,1,1)
