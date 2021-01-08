@@ -20,7 +20,7 @@ def getSample(bus, i2c_addr):
     
 
 bus = SMBus(1)
-adcReadInit(bus, '000', 0X48, 0)
+adcReadInit(bus, 0X48, '000', 0)
 while True:
     print(getSample(bus, 0X48))
     sleep(.1)
