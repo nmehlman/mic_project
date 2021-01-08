@@ -26,4 +26,5 @@ samples = []
 for i in range(10):
     sample = getSample(bus, 0X48)
     samples.append(sample)
+    print(sample)
     sleep(1/44100)
