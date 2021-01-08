@@ -14,8 +14,9 @@ def adcReadInit(slave_addr : str, i2c_addr: int, adc_ch: int):
     A2 = 0x42
     A3 = 0x43
     bus = SMBus(1)
+    bus.write_byte(address,A0)
+    
     while True:
-        bus.write_byte(address,A0)
         value = bus.read_byte(address)
         print("AOUT:%1.3f  " %(value*3.3/255))
         sleep(0.1)
