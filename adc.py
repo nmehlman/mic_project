@@ -17,8 +17,10 @@ def adcReadInit(slave_addr : str, i2c_addr: int, adc_ch: int):
     i2c_addr = int(str(i2c_addr), 16)
 
     with SMBus(1) as bus:  
-        bus.write_byte_data(i2c_addr, 0x00, addr_data_int) #Adress
-        bus.write_byte_data(i2c_addr, 0x00, 0x00) #Control
+        bus.write_byte_data(i2c_addr, 0, addr_data_int) #Adress
+        sample = bus.read_byte(i2c_addr, 0)
+
+    return sample
 
 def getSample(i2c_addr: int):
 
@@ -31,6 +33,6 @@ def getSample(i2c_addr: int):
 
 adcReadInit('000', 48, 0)
 while True:
-    print(getSample(48))
+    print(adcReadInit('000', 48, 0))
     sleep(.1)
 
