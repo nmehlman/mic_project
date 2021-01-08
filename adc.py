@@ -28,6 +28,6 @@ samples = []
 s = timer()
 for i in range(100):
     sample = getSample(bus, 0X48)
-    sleep(1/44100)
+    sleep(1/2000)
 e = timer()
 print(e-s)
