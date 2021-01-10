@@ -28,6 +28,6 @@ samples = []
 s = timer()
 for i in range(16000):
     sample = getSample(bus, 0X48)
-    print("Input level: %s" % sample)
+    #print("Input level: %s" % sample)
 e = timer()
 print(e-s)
