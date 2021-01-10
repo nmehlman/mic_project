@@ -26,8 +26,9 @@ adcReadInit(bus, 0X48, '000', 0)
 samples = []
 
 s = timer()
-for i in range(16000):
+i = 0
+while timer() - s < 1:
     sample = getSample(bus, 0X48)
+    i+=1
     #print("Input level: %s" % sample)
-e = timer()
-print(e-s)
+print(i)
