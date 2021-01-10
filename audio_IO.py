@@ -10,8 +10,8 @@ dev_idx = 1
 output_file = 'test.wav'
 
 audio = pyaudio.PyAudio()
-for ii in range(p.get_device_count()):
-    print(p.get_device_info_by_index(ii).get('name'))
+for ii in range(audio.get_device_count()):
+    print(audio.get_device_info_by_index(ii).get('name'))
 stream = audio.open(format = bit_depth, rate = sr, channels = chans, input_device_index = dev_idx, input = True, frames_per_buffer=chunk)
 
 input('Press any key to record.')
