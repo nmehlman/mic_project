@@ -148,7 +148,7 @@ class PitchDetector:
         return np.argmax(logits), logits
     
     def save_model(self, save_path):
-        full_path = save_path + time_str(sec=False, year=False, path=True)
+        full_path = save_path + time_str(sec=False, year=False, isPath=True)
         if not isdir(full_path): mkdir(full_path)
         tf.keras.models.save_model(self.model, full_path)  
         
