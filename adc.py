@@ -18,7 +18,7 @@ def adcReadInit(bus, i2c_addr, slave_addr, adc_ch):
     bus.write_byte(i2c_addr, control_byte)
     
 def getSample(bus, i2c_addr):
-    return bus.read_byte(i2c_addr)
+    return bus.read_i2c_block_data(i2c_addr, 0, 2)
     
 
 bus = SMBus(1)
@@ -27,8 +27,8 @@ samples = []
 
 s = timer()
 i = 0
-while timer() - s < 1:
+while True:#timer() - s < 1:
     sample = getSample(bus, 0X48)
     i+=1
-    #print("Input level: %s" % sample)
+    print("Input level: %s" % sample)
 print(i)
