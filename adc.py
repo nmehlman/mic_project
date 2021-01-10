@@ -27,7 +27,7 @@ samples = []
 
 s = timer()
 i = 0
-while timer() - s < 1:
+while True:
     sample = getSample(bus, 0X48)
     i+=1
     print("Input level: %s" % sample)
