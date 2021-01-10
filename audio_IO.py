@@ -3,7 +3,7 @@ import wave
 
 bit_depth = pyaudio.paInt16
 chans = 1
-sr = 44100
+sr = 22000
 chunk = 8000
 rec_len = 3
 dev_idx = 1
