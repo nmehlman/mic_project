@@ -6,7 +6,7 @@ chans = 1
 sr = 44100
 chunk = 4096
 rec_len = 3
-dev_idx = 0
+dev_idx = 1
 output_file = 'test.wav'
 
 audio = pyaudio.PyAudio()
