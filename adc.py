@@ -30,6 +30,6 @@ i = 0
 while timer() - s < 1:
     sample = bus.read_byte(0x48)
     i+=1
-    print("Input level: %s" % sample)
+    #print("Input level: %s" % sample)
 
 print(i)
