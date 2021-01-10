@@ -4,7 +4,7 @@ import wave
 bit_depth = pyaudio.paInt16
 chans = 1
 sr = 16000
-chunk = 8000
+chunk = 16000
 rec_len = 3
 dev_idx = 1
 output_file = 'test.wav'
