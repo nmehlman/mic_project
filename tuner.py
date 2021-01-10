@@ -6,24 +6,30 @@ from librosa import load
 from librosa.feature import spectral_centroid, chroma_stft, rms
 import numpy as np
 import matplotlib.pyplot as plt
-from os import listdir
+from os import listdir, mkdir
+from os.path import isdir
 import re
 import pickle
+from utility import time_str
+
+###      **** GLOBALS ****      ###
 
 n_chroma = 36 #Number of spectrogram bins
-T = 44100 #Length of training interval
-thr = -50
-hop_len = 512
+T = 16000 #Length of training interval
+thr = -50 #Triggering threshold
+hop_len = 512 #Hope between STFT frames
+sr = 16000 #Sample Rate
+eps = 1e-8 #Small number to avoid log(0)
+
+##################################
 
 class PitchDetector:
 
     '''NN model to detect signal pitch.'''
 
-    def __init__(self, n_chroma, T, hop_len):
+    def __init__(self, sr, load_path=None):
 
-        self.n_chroma = n_chroma
-        self.T = T
-        self.hop_len = hop_len
+        self.sr = sr
 
         i = Input(shape=(n_chroma, T//hop_len+1))
         x = Reshape((n_chroma, T//hop_len+1, 1))(i)
@@ -33,17 +39,18 @@ class PitchDetector:
         x = Flatten()(x)
         x = Dense(12, activation='softmax')(x)
 
-        self.model = Model(i,x)
+        if load_path: self.model = tf.keras.models.load_model(load_path, compile=False)
+        else: self.model = Model(i,x)
+        
         self.model.compile(optimizer='adam', loss='sparse_categorical_crossentropy')
 
-    def STFT(self, audio, sr=44100):
+    def STFT(self, audio):
 
         '''Computes STFT of audio signal
-        \naudio -> mono audio signal in form of numpy array
-        \nsr -> sample rate'''
+        \naudio -> mono audio signal in form of numpy array'''
 
         audio = self._make_mono(audio)
-        stft = chroma_stft(audio, sr, n_chroma=self.n_chroma, hop_length=self.hop_len)
+        stft = chroma_stft(audio, sr=self.sr, n_chroma=n_chroma, hop_length=hop_len)
         return stft
 
     @staticmethod
@@ -60,52 +67,41 @@ class PitchDetector:
             raise AttributeError('invalid audio signal shape')
         return mono_audio
         
-    def _truncate_audio(self, audio, thr):
+    def _truncate_audio(self, audio):
 
         '''Truncates audio to desired length using a triggering threshold
-        \naudio -> mone audio signal
-        \nthr -> triggering threshold (dB)'''
+        \naudio -> mone audio signal'''
 
         if len(audio) < T: raise ValueError('audio too short')
         frame_len = 2048
-        level = 20*np.log10( rms(audio, frame_length=frame_len) )[0]
+        level = 20*np.log10( rms(audio, frame_length=frame_len) +  eps)[0]
         start_idx = 0
         while level[start_idx] < thr: start_idx += 1 #Find onset
-        start_idx *= frame_len
-        return audio[frame_len : frame_len+self.T]
+        start_idx *= frame_len #Convert to sample
+        if start_idx+T >= len(audio): start_idx = len(audio) - (T+1) #Ensure sufficient length
+        return audio[frame_len : frame_len+T]
 
-    def _generate_training_data(self, audio_files, thr, T, n_chroma, save_path=None):
+    def _generate_training_data(self, audio_files, save_path=None):
         
         '''Generates training data from list of files
         \naudio_files -> list of training files
-        \nthr -> triggering threshold (dB)'''
+        \nsave_path -> location to save converted dataset'''
 
         train_data = []
         targets = []
         for file_path in audio_files:
-            audio = load(file_path, sr=44100, mono=False)[0]
+            audio = load(file_path, sr=self.sr, mono=False)[0]
             audio = self._make_mono(audio)
-            audio = self._truncate_audio(audio, thr)
-            stft = self.STFT(audio, sr=44100)
+            audio = self._truncate_audio(audio)
+            stft = self.STFT(audio)
             train_data.append(stft)
             targets.append(self._parse_filename(file_path))
         
         if save_path:
-            pickle.dump(np.array(train_data), open(save_path+"/train", 'w'))
-            pickle.dump(np.array(targets), open(save_path+"/targets", 'w'))
+            pickle.dump(np.array(train_data), open(save_path + "/train", 'wb'))
+            pickle.dump(np.array(targets), open(save_path + "/targets", 'wb'))
         return np.array(train_data), np.array(targets)
-
-    def train(self, folder, thr, epochs):
-
-        '''Train model from dataset in folder
-        \nfolder -> folder path containing training dataset
-        \nthr -> triggering threshold (dB
-        \nepochs -> number of training epochs'''
-
-        audio_files = [folder + '/' + file_path for file_path in listdir(folder) if '.wav' in file_path]
-        train_data, targets = self._generate_training_data(audio_files, thr, self.T, self.n_chroma, "Processed Datasets")
-        self.model.fit(train_data, targets, epochs=epochs)
-        
+   
     @staticmethod
     def _parse_filename(filename):
 
@@ -119,12 +115,46 @@ class PitchDetector:
         number = pitch_to_num(int(pitch)) #Convert to note number
         return number
 
-        
+    def train_on_files(self, folder, epochs, save_path=None):
+
+        '''Train model from audio files in folder
+        \nfolder -> folder path containing training files
+        \nepochs -> number of training epochs
+        \nsave_path -> location to saved converted dataset'''
+
+        audio_files = [folder + '/' + file_path for file_path in listdir(folder) if '.wav' in file_path] #Find audio files
+        train_data, targets = self._generate_training_data(audio_files, save_path=save_path) #Produce training set
+        self.model.fit(train_data, targets, epochs=epochs)
+
+    def train_on_dataset(self, dataset_path, epochs):
+
+        '''Train model from converted dataset
+        \ndataset_path -> folder path containing training dataset
+        \nepochs -> number of training epochs'''
+
+        train_data = pickle.load(open(dataset_path + "/train", 'rb'))
+        targets = pickle.load(open(dataset_path + "/targets", 'rb'))
+        self.model.fit(train_data, targets, epochs=epochs)
+           
+    def predict_pitch(self, audio):
+
+        '''Predicts pitch of particular audio instance.
+        \naudio -> audio in form of numpy array'''
+
+        audio = self._truncate_audio(self._make_mono(audio))
+        stft = self.STFT(audio)
+        stft = np.expand_dims(stft, 0)
+        logits = self.model.predict(stft)[0]
+        return np.argmax(logits), logits
+    
+    def save_model(self, save_path):
+        full_path = save_path + time_str(sec=False, year=False, path=True)
+        if not isdir(full_path): mkdir(full_path)
+        tf.keras.models.save_model(self.model, full_path)  
         
 if __name__ == '__main__':
 
-    detector = PitchDetector(n_chroma, T, hop_len)
-    #audio = load('Test Files/piano.wav', sr=44100, mono=False)[0]
-    #audio = detector._make_mono(audio)
-    #audio = detector._truncate_audio(audio,-20,T)
-    detector.train('Train Files', thr, 100)
+    detector = PitchDetector(sr)
+    detector.train_on_files('Train Files', 50, 'Saved Models')
+    
+    
