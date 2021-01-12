@@ -1,13 +1,17 @@
 import pyaudio
 import wave
 
+###      **** GLOBALS ****      ###
+
 bit_depth = pyaudio.paInt16
 chans = 1
-sr = 16000
+rec_sr = 44100
 chunk = 4096
 rec_len = 3
 dev_idx = 1
 output_file = 'test.wav'
+
+###################################
 
 audio = pyaudio.PyAudio()
 for ii in range(audio.get_device_count()):

@@ -18,10 +18,10 @@ n_chroma = 36 #Number of spectrogram bins
 T = 16000 #Length of training interval
 thr = -50 #Triggering threshold
 hop_len = 512 #Hope between STFT frames
-sr = 16000 #Sample Rate
+sr = 44100 #Sample Rate
 eps = 1e-8 #Small number to avoid log(0)
 
-##################################
+###################################
 
 class PitchDetector:
 
@@ -155,6 +155,7 @@ class PitchDetector:
 if __name__ == '__main__':
 
     detector = PitchDetector(sr)
-    detector.train_on_files('Train Files', 50, 'Saved Models')
+    detector.train_on_files('Train Files/Converted Files', 50, 'Processed Datasets')
+    detector.save_model('Saved Models')
     
     
